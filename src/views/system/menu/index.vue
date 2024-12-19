@@ -29,14 +29,12 @@
 
 <script setup>
 defineOptions({
-	name: 'User',
+	name: 'Menu',
 })
-import { ref, onMounted, createVNode } from 'vue'
-import { getToken } from '@/utils/auth'
+import { ref } from 'vue'
 import {
 	createButton,
 	createSpaceGroup,
-	createTag,
 } from '@/utils/createElement'
 
 import { menuList, updateMenu, addMenu } from '@/api/system/menu'
@@ -44,13 +42,10 @@ import dayjs from 'dayjs'
 import {
 	ElButton,
 	ElMessage,
-	ElSpace,
 	ElMessageBox,
-	ElImage,
 } from 'element-plus'
 import DialogForm from '@/components/DialogForm/index.vue'
 import ProTable from '@/components/ProTable/index.vue'
-import router from '@/router'
 const dataSource = ref([])
 const proTable = ref()
 const visible = ref(false)
