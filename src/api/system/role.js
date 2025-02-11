@@ -1,119 +1,82 @@
 import request from '@/utils/request'
 
-// 查询角色列表
-export function roleList(query) {
-	return request({
-		url: '/role/list',
-		method: 'get',
-		params: query,
-	})
-}
-
-// 查询角色详细
-export function getRole(roleId) {
-	return request({
-		url: '/role/' + roleId,
-		method: 'get',
-	})
-}
-
-// 新增角色
+// 创建角色
 export function addRole(data) {
-	return request({
-		url: '/role',
-		method: 'post',
-		data: data,
-	})
+  return request({
+    url: '/role/create',
+    method: 'post',
+    data: data
+  })
 }
 
-// 修改角色
+// 获取单个角色信息
+export function getRole(roleId) {
+  return request({
+    url: '/role',
+    method: 'get',
+    params: { id: roleId }
+  })
+}
+
+// 获取角色列表
+export function roleList(query) {
+  return request({
+    url: '/role/list',
+    method: 'get',
+    params: query
+  })
+}
+
+// 更新角色信息
 export function updateRole(data) {
-	return request({
-		url: '/role/update',
-		method: 'post',
-		data: data,
-	})
-}
-
-// 角色数据权限
-export function dataScope(data) {
-	return request({
-		url: '/role/dataScope',
-		method: 'put',
-		data: data,
-	})
-}
-
-// 角色状态修改
-export function changeRoleStatus(roleId, status) {
-	const data = {
-		roleId,
-		status,
-	}
-	return request({
-		url: '/role/changeStatus',
-		method: 'put',
-		data: data,
-	})
+  return request({
+    url: '/role/update',
+    method: 'post',
+    data: data
+  })
 }
 
 // 删除角色
 export function delRole(roleId) {
-	return request({
-		url: '/role/' + roleId,
-		method: 'delete',
-	})
+  return request({
+    url: '/role/delete',
+    method: 'post',
+    data: { id: roleId }
+  })
 }
 
-// 查询角色已授权用户列表
-export function allocatedUserList(query) {
-	return request({
-		url: '/role/authUser/allocatedList',
-		method: 'get',
-		params: query,
-	})
+// 为角色绑定菜单
+export function bindMenu(data) {
+  return request({
+    url: '/role/bindMenu',
+    method: 'post',
+    data: data
+  })
 }
 
-// 查询角色未授权用户列表
-export function unallocatedUserList(query) {
-	return request({
-		url: '/role/authUser/unallocatedList',
-		method: 'get',
-		params: query,
-	})
+// 为角色解绑菜单
+export function unbindMenu(data) {
+  return request({
+    url: '/role/unbindMenu',
+    method: 'post',
+    data: data
+  })
 }
 
-// 取消用户授权角色
-export function authUserCancel(data) {
-	return request({
-		url: '/role/authUser/cancel',
-		method: 'put',
-		data: data,
-	})
+// 获取角色拥有的菜单列表
+export function getRoleMenus(roleId) {
+  return request({
+    url: '/role/menus',
+    method: 'get',
+    params: { id: roleId }
+  })
 }
 
-// 批量取消用户授权角色
-export function authUserCancelAll(data) {
-	return request({
-		url: '/role/authUser/cancelAll',
-		method: 'put',
-		params: data,
-	})
-}
-
-// 授权用户选择
-export function authUserSelectAll(data) {
-	return request({
-		url: '/role/authUser/selectAll',
-		method: 'put',
-		params: data,
-	})
-}
-
-// 根据角色ID查询部门树结构
-export function deptTreeSelect(roleId) {
-	return request({
-		url: '/role/deptTree/' + roleId,
-		method: 'get',
-	})
+// 获取拥有该角色的用户列表
+export function getRoleUsers(roleId) {
+  return request({
+    url: '/role/users',
+    method: 'get',
+    params: { id: roleId }
+  })
 }

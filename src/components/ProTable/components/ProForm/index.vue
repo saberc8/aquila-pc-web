@@ -21,11 +21,11 @@
           <a v-if="searchForm.length > 2" style="font-size: 12px" @click="expand = !expand">
             <template v-if="expand">
               收起
-              <el-icon><ArrowUp /></el-icon>
+              <svg-icon icon-class="solar:alt-arrow-up-bold-duotone" />
             </template>
             <template v-else>
               展开
-              <el-icon><ArrowDown /></el-icon>
+              <svg-icon icon-class="solar:alt-arrow-down-bold-duotone" />
             </template>
           </a>
         </el-space>
@@ -34,7 +34,7 @@
   </el-form>
 </template>
 <script setup>
-  import { ArrowUp, ArrowDown } from '@element-plus/icons-vue'
+  import SvgIcon from '@/components/SvgIcon/index.vue'
   defineProps({
     searchForm: {
       type: Array,
@@ -65,3 +65,11 @@
     emit('resetData')
   }
 </script>
+
+<style scoped>
+:deep(.icon-wrapper) {
+  vertical-align: middle;
+  width: 14px;
+  height: 14px;
+}
+</style>

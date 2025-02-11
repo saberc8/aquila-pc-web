@@ -27,6 +27,15 @@
 		:showGeoLink="false"
 		@close="close"
 	></DialogForm>
+	<DialogForm
+		v-if="roleVisible"
+		title="绑定角色"
+		:visible="roleVisible"
+		:formData="roleFormData"
+		:renderForm="roleRenderForm"
+		:formFunc="bindUserRole"
+		@close="closeRole"
+	></DialogForm>
 </template>
 
 <script setup>
@@ -41,7 +50,7 @@ import {
 	createTag,
 } from '@/utils/createElement'
 
-import { userList, updateUser, addUser, changeUserPassword } from '@/api/system/user'
+import { userList, updateUser, addUser, changePassword, delUser, bindUserRole, getUserRoles } from '@/api/system/user'
 import dayjs from 'dayjs'
 import {
 	ElButton,
@@ -129,20 +138,22 @@ const columns = [
 	},
 	{
 		title: '操作',
-		width: 190,
+		width: 280,
 		align: 'center',
 		fixed: 'right',
 		slots: {
 			default: ({ row }) => {
 				return createSpaceGroup([
 					createButton('primary', 'small', '编辑', () => updateColumnData(row)),
-					createButton('danger', 'small', '修改密码', () => changePassword(row)),
-
+					createButton('warning', 'small', '角色', () => showBindRole(row)),
+					createButton('danger', 'small', '删除', () => handleDelete(row.id)),
+					createButton('warning', 'small', '修改密码', () => changePasswordModel(row))
 				])
 			},
 		},
 	},
 ]
+
 const showForm = true
 // 搜索区域
 const searchForm = [
@@ -201,12 +212,12 @@ const updateColumnData = (row) => {
 	visible.value = true
 }
 
-const changePassword = (row) => {
+const changePasswordModel = (row) => {
 	const rowBak = JSON.parse(JSON.stringify(row))
 	delete rowBak._X_ROW_KEY
 	title.value = '修改密码'
 	formData.value = rowBak
-	formFunc.value = changeUserPassword
+	formFunc.value = changePassword
 }
 const deleteFunc = async (id) => {
 	ElMessageBox.confirm('确认删除吗？', '提示', {
@@ -236,6 +247,57 @@ const detailData = (row) => {
 			name: row.name,
 		},
 	})
+}
+
+const roleVisible = ref(false)
+const roleFormData = ref({
+  userId: '',
+  roleIds: []
+})
+
+const roleRenderForm = [
+  {
+    field: 'roleIds',
+    label: '角色',
+    type: 'select-dynamic',
+    placeholder: '请选择角色',
+    required: true,
+    componentProps: {
+      multiple: true,
+      renderFunc: getUserRoles,
+      renderParams: {},
+      formatData: {
+        label: 'name',
+        value: 'id'
+      }
+    }
+  }
+]
+
+const showBindRole = async (row) => {
+  roleVisible.value = true
+  roleFormData.value.userId = row.id
+  const roles = await getUserRoles(row.id)
+  roleFormData.value.roleIds = roles.data.map(role => role.id)
+}
+
+const closeRole = (refresh) => {
+  roleVisible.value = false
+  if(refresh) {
+    refreshTable()
+  }
+}
+
+const handleDelete = (id) => {
+  ElMessageBox.confirm('确认删除该用户?', '警告', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(async () => {
+    await delUser(id)
+    ElMessage.success('删除成功')
+    refreshTable()
+  })
 }
 
 </script>

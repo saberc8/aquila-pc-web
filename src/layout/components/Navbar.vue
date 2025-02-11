@@ -19,7 +19,7 @@
 				>
 					<div class="avatar-wrapper">
 						<img :src="userStore.avatar" class="user-avatar" />
-						<el-icon><caret-bottom /></el-icon>
+						 <svg-icon icon-class="solar:alt-arrow-down-bold-duotone" />
 					</div>
 					<template #dropdown>
 						<el-dropdown-menu>
@@ -45,9 +45,10 @@
 
 <script setup>
 import { ElMessageBox } from 'element-plus'
-import Breadcrumb from '@/components/Breadcrumb'
-import Hamburger from '@/components/Hamburger'
-import Screenfull from '@/components/Screenfull'
+import Breadcrumb from './Breadcrumb'
+import Hamburger from './Hamburger'
+import Screenfull from './Screenfull'
+import SvgIcon from '@/components/SvgIcon/index.vue'
 import useAppStore from '@/store/modules/app'
 import useUserStore from '@/store/modules/user'
 import useSettingsStore from '@/store/modules/settings'
@@ -169,10 +170,11 @@ function setLayout() {
 					height: 30px;
 					border-radius: 6px;
 				}
-				i {
-					cursor: pointer;
-					font-size: 12px;
+				.svg-icon {
+					width: 16px;
+					height: 16px;
 					margin-left: 6px;
+					cursor: pointer;
 				}
 			}
 		}

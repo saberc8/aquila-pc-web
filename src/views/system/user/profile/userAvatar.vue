@@ -1,6 +1,5 @@
 <template>
 	<div class="user-info-head" @click="editCropper()">
-		<img :src="options.img" title="点击上传头像" class="img-circle img-lg" />
 		<el-dialog
 			:title="title"
 			v-model="open"
@@ -34,19 +33,6 @@
 			</el-row>
 			<br />
 			<el-row>
-				<el-col :lg="2" :md="2">
-					<el-upload
-						action="#"
-						:http-request="requestUpload"
-						:show-file-list="false"
-						:before-upload="beforeUpload"
-					>
-						<el-button>
-							选择
-							<el-icon class="el-icon--right"><Upload /></el-icon>
-						</el-button>
-					</el-upload>
-				</el-col>
 				<el-col :lg="{ span: 1, offset: 2 }" :md="2">
 					<el-button icon="Plus" @click="changeScale(1)"></el-button>
 				</el-col>

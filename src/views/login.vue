@@ -13,7 +13,7 @@
 					:rules="loginRules"
 					class="login-form"
 				>
-					<h3 class="title">go管理系统</h3>
+					<h3 class="title">管理系统</h3>
 					<el-form-item prop="username">
 						<el-input
 							v-model="loginForm.username"
@@ -23,7 +23,7 @@
 							placeholder="账号"
 						>
 							<template #prefix
-								><svg-icon icon-class="user" class="el-input__icon input-icon"
+								><svg-icon icon-class="solar:user-circle-bold-duotone" class="el-input__icon input-icon"
 							/></template>
 						</el-input>
 					</el-form-item>
@@ -38,7 +38,7 @@
 						>
 							<template #prefix
 								><svg-icon
-									icon-class="password"
+									icon-class="solar:lock-password-bold-duotone"
 									class="el-input__icon input-icon"
 							/></template>
 						</el-input>
@@ -47,6 +47,7 @@
 						<el-input
 							v-model="loginForm.code"
 							size="large"
+							clearable
 							auto-complete="off"
 							placeholder="验证码"
 							style="width: 63%"
@@ -54,7 +55,7 @@
 						>
 							<template #prefix
 								><svg-icon
-									icon-class="validCode"
+									icon-class="solar:shield-keyhole-bold-duotone"
 									class="el-input__icon input-icon"
 							/></template>
 						</el-input>
@@ -80,6 +81,14 @@
 							<span v-if="!loading">登 录</span>
 							<span v-else>登 录 中...</span>
 						</el-button>
+						<el-button
+							style="width: 100%; margin: 10px 0;"
+							size="large"
+							type="warning"
+							@click="handleInitDb"
+						>
+							初始化数据库
+						</el-button>
 						<div style="float: right" v-if="register">
 							<router-link class="link-type" :to="'/register'"
 								>立即注册</router-link
@@ -98,9 +107,11 @@
 
 <script setup>
 import { getCodeImg } from '@/api/login'
+import { initDb } from '@/api/system/init_db'
 import Cookies from 'js-cookie'
 import { encrypt, decrypt } from '@/utils/jsencrypt'
 import useUserStore from '@/store/modules/user'
+import SvgIcon from '@/components/SvgIcon/index.vue'
 
 const userStore = useUserStore()
 const route = useRoute()
@@ -171,6 +182,14 @@ function getCode() {
 			console.log(loginForm.value);
 		}
 	})
+}
+
+const handleInitDb = () => {
+	proxy.$modal.confirm('确认要初始化数据库吗？').then(() => {
+		initDb().then(res => {
+			proxy.$modal.msgSuccess('初始化成功')
+		})
+	}).catch(() => {})
 }
 
 getCode()
@@ -286,7 +305,7 @@ getCode()
 		}
 		.input-icon {
 			height: 39px;
-			width: 14px;
+			width: 16px;
 			margin-left: 0px;
 		}
 	}

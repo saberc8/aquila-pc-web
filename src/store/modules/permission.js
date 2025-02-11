@@ -1,6 +1,6 @@
 import auth from '@/plugins/auth'
 import { constantRoutes } from '@/router'
-import { getUserMenus } from '@/api/menu'
+import { getUserMenus } from '@/api/system/menu'
 import Layout from '@/layout/index'
 import InnerLink from '@/layout/components/InnerLink'
 

@@ -16,7 +16,7 @@ const useSettingsStore = defineStore('settings', {
 		theme: '#1677ff',
 		sideTheme: sideTheme,
 		showSettings: showSettings,
-		tagsView: undefined,
+		tagsView: true,
 		fixedHeader: undefined,
 		sidebarLogo: true,
 		dynamicTitle: undefined,

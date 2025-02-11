@@ -1,48 +1,6 @@
 <template>
 	<div class="app-container">
 		<el-row :gutter="20">
-			<el-col :span="6" :xs="24">
-				<el-card class="box-card">
-					<template v-slot:header>
-						<div class="clearfix">
-							<span>个人信息</span>
-						</div>
-					</template>
-					<div>
-						<div class="text-center">
-							<userAvatar />
-						</div>
-						<ul class="list-group list-group-striped">
-							<li class="list-group-item">
-								<svg-icon icon-class="user" />用户名称
-								<div class="pull-right">{{ state.user.userName }}</div>
-							</li>
-							<li class="list-group-item">
-								<svg-icon icon-class="phone" />手机号码
-								<div class="pull-right">{{ state.user.phonenumber }}</div>
-							</li>
-							<li class="list-group-item">
-								<svg-icon icon-class="email" />用户邮箱
-								<div class="pull-right">{{ state.user.email }}</div>
-							</li>
-							<li class="list-group-item">
-								<svg-icon icon-class="tree" />所属部门
-								<div class="pull-right" v-if="state.user.dept">
-									{{ state.user.dept.deptName }} / {{ state.postGroup }}
-								</div>
-							</li>
-							<li class="list-group-item">
-								<svg-icon icon-class="peoples" />所属角色
-								<div class="pull-right">{{ state.roleGroup }}</div>
-							</li>
-							<li class="list-group-item">
-								<svg-icon icon-class="date" />创建日期
-								<div class="pull-right">{{ state.user.createAt }}</div>
-							</li>
-						</ul>
-					</div>
-				</el-card>
-			</el-col>
 			<el-col :span="18" :xs="24">
 				<el-card>
 					<template v-slot:header>

@@ -65,7 +65,7 @@ let total = ref(0)
 const renderTable = (func, params) => {
 	func(params).then((res) => {
 		console.log(res, '请求的数据')
-		data.value = res.data
+		data.value = res.data || res
 		total.value = res.total
 	})
 }

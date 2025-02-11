@@ -52,6 +52,16 @@
 					:required="item.required"
 					@imgChange="(val) => changeValue(val, item.field)"
 				></ZUploadImg>
+				<ZTree
+					v-if="item.type === 'tree'"
+					:value="form[`${item.field}`]"
+					:data="item.componentProps.data"
+					:props="item.componentProps.props"
+					:node-key="item.componentProps.nodeKey"
+					:default-expand-all="item.componentProps.defaultExpandAll"
+					:required="item.required"
+					@treeChange="(val) => changeValue(val, item.field)"
+				/>
 			</el-form-item>
 		</el-form>
 		<div class="link" v-if="showGeoLink">
@@ -74,6 +84,7 @@ import ZInputNumber from './components/ZInputNumber.vue'
 import ZDate from './components/ZDate.vue'
 import ZSelect from './components/ZSelect.vue'
 import ZUploadImg from './components/ZUploadImg.vue'
+import ZTree from './components/ZTree.vue'
 import { ref } from 'vue'
 const props = defineProps({
 	title: {

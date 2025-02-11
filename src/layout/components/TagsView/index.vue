@@ -17,11 +17,8 @@
 				@contextmenu.prevent="openMenu(tag, $event)"
 			>
 				{{ tag.title }}
-				<span v-if="!isAffix(tag)" @click.prevent.stop="closeSelectedTag(tag)">
-					<close
-						class="el-icon-close"
-						style="width: 1em; height: 1em; vertical-align: middle"
-					/>
+				<span v-if="!isAffix(tag)" class="close-button" @click.prevent.stop="closeSelectedTag(tag)">
+					 <svg-icon icon-class="solar:close-circle-line-duotone" class="close-icon" />
 				</span>
 			</router-link>
 		</scroll-pane>
@@ -31,22 +28,22 @@
 			class="contextmenu"
 		>
 			<li @click="refreshSelectedTag(selectedTag)">
-				<refresh-right style="width: 1em; height: 1em" /> 刷新页面
+				 <svg-icon icon-class="solar:refresh-circle-bold-duotone" class="menu-icon" /> 刷新页面
 			</li>
 			<li v-if="!isAffix(selectedTag)" @click="closeSelectedTag(selectedTag)">
-				<close style="width: 1em; height: 1em" /> 关闭当前
+				 <svg-icon icon-class="solar:close-circle-bold-duotone" class="menu-icon" /> 关闭当前
 			</li>
 			<li @click="closeOthersTags">
-				<circle-close style="width: 1em; height: 1em" /> 关闭其他
+				 <svg-icon icon-class="solar:close-circle-bold-duotone" class="menu-icon" /> 关闭其他
 			</li>
 			<li v-if="!isFirstView()" @click="closeLeftTags">
-				<back style="width: 1em; height: 1em" /> 关闭左侧
+				 <svg-icon icon-class="solar:alt-arrow-left-bold-duotone" class="menu-icon" /> 关闭左侧
 			</li>
 			<li v-if="!isLastView()" @click="closeRightTags">
-				<right style="width: 1em; height: 1em" /> 关闭右侧
+				 <svg-icon icon-class="solar:alt-arrow-right-bold-duotone" class="menu-icon" /> 关闭右侧
 			</li>
 			<li @click="closeAllTags(selectedTag)">
-				<circle-close style="width: 1em; height: 1em" /> 全部关闭
+				 <svg-icon icon-class="solar:close-square-bold-duotone" class="menu-icon" /> 全部关闭
 			</li>
 		</ul>
 	</div>
@@ -54,6 +51,7 @@
 
 <script setup>
 import ScrollPane from './ScrollPane'
+import SvgIcon from '@/components/SvgIcon/index.vue'
 import { getNormalPath } from '@/utils/tools'
 import useTagsViewStore from '@/store/modules/tagsView'
 import useSettingsStore from '@/store/modules/settings'
@@ -300,6 +298,49 @@ function handleScroll() {
 					position: relative;
 					margin-right: 5px;
 				}
+				.close-icon {
+					width: 12px;
+					height: 12px;
+					vertical-align: -2px;
+					border-radius: 50%;
+					text-align: center;
+					transition: all 0.3s;
+					transform-origin: 100% 50%;
+					&:hover {
+						background-color: var(--el-color-primary-light-5);
+						color: #fff;
+					}
+				}
+				.close-button {
+					display: inline-block;
+					.close-icon {
+						color: #fff;
+						&:hover {
+							background-color: var(--el-color-primary-light-5);
+						}
+					}
+				}
+			}
+			.close-button {
+				display: none;
+				.close-icon {
+					width: 12px;
+					height: 12px;
+					vertical-align: -2px;
+					border-radius: 50%;
+					text-align: center;
+					transition: all 0.3s;
+					transform-origin: 100% 50%;
+					&:hover {
+						background-color: var(--el-color-primary-light-5);
+						color: #fff;
+					}
+				}
+			}
+			&:hover {
+				.close-button {
+					display: inline-block;
+				}
 			}
 		}
 	}
@@ -322,34 +363,11 @@ function handleScroll() {
 			&:hover {
 				background: #eee;
 			}
-		}
-	}
-}
-</style>
-
-<style lang="scss">
-//reset element css of el-icon-close
-.tags-view-wrapper {
-	.tags-view-item {
-		border-radius: 4px;
-		.el-icon-close {
-			width: 16px;
-			height: 16px;
-			vertical-align: 2px;
-			border-radius: 50%;
-			text-align: center;
-			transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
-			transform-origin: 100% 50%;
-			&:before {
-				transform: scale(0.6);
-				display: inline-block;
+			.menu-icon {
+				width: 16px;
+				height: 16px;
+				margin-right: 8px;
 				vertical-align: -3px;
-			}
-			&:hover {
-				background-color: #bad0ff;
-				color: #fff;
-				width: 12px !important;
-				height: 12px !important;
 			}
 		}
 	}

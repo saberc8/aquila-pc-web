@@ -1,7 +1,6 @@
 <template>
 	<ProTable
 		ref="proTable"
-		:dataSource="dataSource"
 		:columns="columns"
 		:params="params"
 		:searchForm="searchForm"
@@ -24,16 +23,24 @@
 		:formData="formData"
 		:renderForm="renderForm"
 		:formFunc="formFunc"
-		:showGeoLink="false"
 		@close="close"
-	></DialogForm>
+	/>
+	<DialogForm 
+		v-if="menuVisible"
+		:title="'绑定菜单'"
+		:visible="menuVisible"
+		:formData="menuFormData"
+		:renderForm="menuRenderForm"
+		:formFunc="handleBindMenu"
+		@close="closeMenuDialog"
+	/>
 </template>
 
 <script setup>
 defineOptions({
-	name: 'User',
+	name: 'Role',
 })
-import { ref, onMounted, createVNode } from 'vue'
+import { ref, onMounted, createVNode, nextTick, computed, shallowRef } from 'vue'
 import { getToken } from '@/utils/auth'
 import {
 	createButton,
@@ -41,7 +48,8 @@ import {
 	createTag,
 } from '@/utils/createElement'
 
-import { roleList, updateRole, addRole } from '@/api/system/role'
+import { roleList, updateRole, addRole, bindMenu, getRoleMenus } from '@/api/system/role'
+import { getMenuTreeByRoleId, getMenuTree } from '@/api/system/menu'
 import dayjs from 'dayjs'
 import {
 	ElButton,
@@ -53,85 +61,113 @@ import {
 import DialogForm from '@/components/DialogForm/index.vue'
 import ProTable from '@/components/ProTable/index.vue'
 import router from '@/router'
-const dataSource = ref([])
 const proTable = ref()
 const visible = ref(false)
 const title = ref('新增')
 const getListFunc = roleList
 const formFunc = ref()
 const formData = ref({
-	name: '',
+  name: '',
+  remark: '',
+  status: 0
 })
 const renderForm = [
-	{
-		field: 'name',
-		label: '角色名称',
-		type: 'input',
-		placeholder: '请输入',
-		required: true,
-	},
+  {
+    field: 'name',
+    label: '角色名称',
+    type: 'input',
+    required: true,
+    componentProps: {
+      placeholder: '请输入角色名称',
+      maxlength: 50
+    }
+  },
+  {
+    field: 'status',
+    label: '状态',
+    type: 'select',
+    required: true,
+    componentProps: {
+      options: [
+        { label: '正常', value: 0 },
+        { label: '禁用', value: 1 }
+      ]
+    }
+  },
+  {
+    field: 'remark',
+    label: '备注',
+    type: 'input',
+    componentProps: {
+      placeholder: '请输入备注信息',
+      maxlength: 100,
+      rows: 3
+    }
+  }
 ]
 const columns = [
-	{
-		type: 'seq',
-		width: 60,
-		treeNode: false, // 开启树图表
-	},
-	{ field: 'id', title: 'ID', width: 80 },
-	{ field: 'name', title: '角色名称', width: 140 },
-	{ field: 'status', title: '是否禁用', width: 140 },
-	{
-		field: 'createAt',
-		title: '创建时间',
-		width: 180,
-		formatter: (row) => {
-			return dayjs(row.row.createdAt).format('YYYY-MM-DD HH:mm:ss')
-		},
-	},
-	{
-		field: 'updateAt',
-		title: '更新时间',
-		width: 180,
-		formatter: (row) => {
-			return row.row.updatedAt
-				? dayjs(row.row.updatedAt).format('YYYY-MM-DD HH:mm:ss')
-				: dayjs(row.row.createAt).format('YYYY-MM-DD HH:mm:ss')
-		},
-	},
-	{
-		title: '操作',
-		width: 190,
-		align: 'center',
-		fixed: 'right',
-		slots: {
-			default: ({ row }) => {
-				return createSpaceGroup([
-					createButton('primary', 'small', '编辑', () => updateColumnData(row)),
-					createButton('primary', 'small', '绑定菜单', () => bindMenuBtn(row)),
-				])
-			},
-		},
-	},
+  {
+    type: 'seq',
+    width: 60,
+    treeNode: false
+  },
+  { field: 'id', title: 'ID', width: 80 },
+  { field: 'name', title: '角色名称', width: 150 },
+  { 
+    field: 'status', 
+    title: '状态', 
+    width: 100,
+    formatter: (row) => {
+      return row.row.status === 0 ? '正常' : '禁用'
+    }
+  },
+  { field: 'remark', title: '备注' },
+  {
+    field: 'createAt',
+    title: '创建时间',
+    width: 180,
+    formatter: (row) => {
+      return dayjs(row.row.createdAt).format('YYYY-MM-DD HH:mm:ss')
+    }
+  },
+  {
+    title: '操作',
+    width: 190,
+    align: 'center',
+    fixed: 'right',
+    slots: {
+      default: ({ row }) => {
+        return createSpaceGroup([
+          createButton('primary', 'small', '编辑', () => updateColumnData(row)),
+          createButton('primary', 'small', '绑定菜单', () => bindMenuBtn(row))
+        ])
+      }
+    }
+  }
 ]
 const showForm = true
 // 搜索区域
 const searchForm = [
-	{
-		label: '角色名称',
-		field: 'name',
-		type: 'input',
-		componentProps: {
-			placeholder: '请输入',
-		},
-	},
-	{
-		label: '昵称',
-		field: 'nickname',
-		type: 'input',
-		componentProps: {
-			placeholder: '请输入',
-		},
-	},
+  {
+    label: '角色名称',
+    field: 'name',
+    type: 'input',
+    componentProps: {
+      placeholder: '请输入角色名称'
+    }
+  },
+  {
+    label: '状态',
+    field: 'status',
+    type: 'select',
+    componentProps: {
+      options: [
+        { label: '全部', value: '' },
+        { label: '正常', value: 0 },
+        { label: '禁用', value: 1 }
+      ]
+    }
+  }
 ]
 const params = ref({
 	pageNum: 1,
@@ -144,7 +180,6 @@ const add = async () => {
 		acc[cur.field] = ''
 		return acc
 	}, {})
-	formData.value.password = '123456'
 	formFunc.value = addRole
 }
 
@@ -171,8 +206,92 @@ const updateColumnData = (row) => {
 	visible.value = true
 }
 
-const bindMenuBtn = (row) => {
-	console.log(row);
+// 修改查找节点的辅助函数，返回符合 setCheckedNodes 所需的格式
+const findNodesByIds = (tree, ids) => {
+  const nodes = []
+  const traverse = (items) => {
+    items.forEach(item => {
+      if (ids.includes(item.id)) {
+        nodes.push({
+          id: item.id,
+          label: item.name
+        })
+      }
+      if (item.children) {
+        traverse(item.children)
+      }
+    })
+  }
+  traverse(tree)
+  return nodes
+}
+
+const bindMenuBtn = async (row) => {
+  try {
+    // 先获取菜单树
+    const menuRes = await getMenuTree()
+    console.log('菜单树数据:', menuRes)
+    
+    // 再获取角色已有菜单
+    const roleMenuRes = await getRoleMenus(row.id)
+    console.log('角色菜单数据:', roleMenuRes)
+    
+    // 先设置数据，后显示对话框
+    menuTreeData.value = Array.isArray(menuRes) ? menuRes : [] // 修正这里的数据获取
+    menuFormData.value = {
+      menuIds: Array.isArray(roleMenuRes) ? roleMenuRes.map(item => item.id) : []
+    }
+    
+    // 确保数据设置完成后再打开对话框
+    await nextTick()
+    currentRoleId.value = row.id
+    menuVisible.value = true
+
+    console.log('树形组件数据:', {
+      treeData: menuTreeData.value,
+      checkedKeys: menuFormData.value.menuIds
+    })
+  } catch (error) {
+    console.error('获取菜单数据失败:', error)
+    ElMessage.error('获取菜单数据失败')
+  }
+}
+
+const handleBindMenu = async (formData) => {
+  try {
+    await bindMenu({
+      roleId: currentRoleId.value,
+      menuIds: formData.menuIds
+    })
+    ElMessage.success('菜单绑定成功')
+    menuVisible.value = false
+    return true
+  } catch (error) {
+    ElMessage.error('绑定菜单失败')
+    return false
+  }
+}
+
+const closeMenuDialog = () => {
+  menuVisible.value = false
+  menuFormData.value.menuIds = []
+}
+
+// 加载角色菜单
+const loadRoleMenus = async (roleId) => {
+  try {
+    const [menuTree, roleMenus] = await Promise.all([
+      getMenuTree(),
+      getRoleMenus(roleId)
+    ])
+    menuTreeData.value = menuTree.data
+    if(roleMenus?.data?.length) {
+      menuTree.value?.setCheckedKeys(roleMenus.data.map(m => m.id))
+    }
+  } catch (error) {
+    console.error('获取角色菜单失败:', error)
+    ElMessage.error('获取角色菜单失败')
+  }
 }
 
 const deleteFunc = async (id) => {
@@ -186,5 +305,38 @@ const deleteFunc = async (id) => {
 		refreshTable()
 	})
 }
+
+const menuVisible = ref(false)
+const menuTreeData = shallowRef([])
+const currentRoleId = ref(null)
+const menuTree = ref(null)
+const defaultProps = {
+	children: 'children',
+	label: 'name'
+}
+
+const menuFormData = ref({
+  menuIds: []
+})
+
+const menuRenderForm = computed(() => {
+  console.log('menuTreeData when computed:', menuTreeData.value)
+  return [{
+    field: 'menuIds',
+    label: '',
+    type: 'tree',
+    required: true,
+    componentProps: {
+      data: menuTreeData.value || [],
+      nodeKey: 'id',
+      props: {
+        children: 'children',
+        label: 'name' // 确保这里使用 name 字段作为显示文本
+      },
+      showCheckbox: true,
+      defaultExpandAll: true
+    }
+  }]
+})
 
 </script>

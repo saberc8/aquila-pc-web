@@ -8,9 +8,11 @@
 			<template #toolbar_tools>
 				<el-space>
 					<slot name="toolbar_buttons"></slot>
-					<el-tooltip content="刷新" placement="top">
-						<el-icon @click="reloadData"><RefreshRight /></el-icon>
-					</el-tooltip>
+					<svg-icon
+						icon-class="solar:refresh-circle-line-duotone"
+						class="refresh-icon"
+						@click="reloadData"
+					/>
 				</el-space>
 			</template>
 
@@ -37,7 +39,7 @@
 </template>
 
 <script setup>
-import { RefreshRight } from '@element-plus/icons-vue'
+import SvgIcon from '@/components/SvgIcon/index.vue'
 import { VxeGrid } from 'vxe-table'
 const props = defineProps({
 	dataSource: {
@@ -70,9 +72,9 @@ let data = []
 const gridOptions = reactive({
 	border: true,
 	treeConfig: {
-    rowField: 'id',
-    childrenField: 'children'
-  },
+		rowField: 'id',
+		childrenField: 'children',
+	},
 	align: null,
 	columnConfig: {
 		resizable: true,
@@ -93,7 +95,7 @@ const gridOptions = reactive({
 	...props.gridOtherOptions,
 })
 const handlePageNumChange = ({ currentPage }) => {
-	console.log('handlePageNumChange - ', currentPage);
+	console.log('handlePageNumChange - ', currentPage)
 	const tablePageBak = {
 		pageNum: currentPage,
 		pageSize: tablePage.value.pageSize,
@@ -128,4 +130,11 @@ const reloadData = () => {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.refresh-icon {
+	cursor: pointer;
+	width: 20px;
+	height: 20px;
+	color: #1677ff;
+}
+</style>
