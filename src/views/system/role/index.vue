@@ -48,7 +48,7 @@ import {
 	createTag,
 } from '@/utils/createElement'
 
-import { roleList, updateRole, addRole, bindMenu, getRoleMenus } from '@/api/system/role'
+import { roleList, updateRole, addRole, bindMenu, getRoleMenus, delRole } from '@/api/system/role'
 import { getMenuTreeByRoleId, getMenuTree } from '@/api/system/menu'
 import dayjs from 'dayjs'
 import {
@@ -132,14 +132,15 @@ const columns = [
   },
   {
     title: '操作',
-    width: 190,
+    width: 260, // 增加宽度以适应新按钮
     align: 'center',
     fixed: 'right',
     slots: {
       default: ({ row }) => {
         return createSpaceGroup([
           createButton('primary', 'small', '编辑', () => updateColumnData(row)),
-          createButton('primary', 'small', '绑定菜单', () => bindMenuBtn(row))
+          createButton('primary', 'small', '绑定菜单', () => bindMenuBtn(row)),
+          createButton('danger', 'small', '删除', () => handleDelete(row))
         ])
       }
     }
@@ -304,6 +305,22 @@ const deleteFunc = async (id) => {
 		ElMessage.success('删除成功')
 		refreshTable()
 	})
+}
+
+const handleDelete = (row) => {
+  ElMessageBox.confirm(`确定要删除角色"${row.name}"吗？`, '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(async () => {
+    try {
+      await delRole(row.id)
+      ElMessage.success('删除成功')
+      refreshTable()
+    } catch (error) {
+      ElMessage.error('删除失败')
+    }
+  }).catch(() => {})
 }
 
 const menuVisible = ref(false)

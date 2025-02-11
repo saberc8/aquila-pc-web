@@ -303,18 +303,24 @@ const updateColumnData = (row) => {
 	visible.value = true
 }
 
+// 修改删除处理函数
 const deleteMenu = async (id) => {
-	ElMessageBox.confirm('确认删除此菜单吗？', '提示', {
-		confirmButtonText: '确定',
-		cancelButtonText: '取消',
-		type: 'warning',
-	})
-		.then(async () => {
-			await delMenu(id)
-			ElMessage.success('删除成功')
-			refreshTable()
-		})
-		.catch(() => {})
+  ElMessageBox.confirm('删除菜单后，所有角色对应的菜单权限也将被删除，确认要删除吗？', '警告', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning'
+  }).then(async () => {
+    try {
+      await delMenu(id)
+      ElMessage.success('删除成功')
+      refreshTable()
+    } catch (error) {
+      console.error('删除菜单失败:', error)
+      ElMessage.error('删除失败')
+    }
+  }).catch(() => {
+    // 取消删除操作
+  })
 }
 
 // 新增处理子菜单的函数

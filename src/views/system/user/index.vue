@@ -51,6 +51,8 @@ import {
 } from '@/utils/createElement'
 
 import { userList, updateUser, addUser, changePassword, delUser, bindUserRole, getUserRoles } from '@/api/system/user'
+import { roleList } from '@/api/system/role'
+
 import dayjs from 'dayjs'
 import {
 	ElButton,
@@ -73,20 +75,73 @@ const formData = ref({
 	nickname: '',
 })
 const renderForm = [
-	{
-		field: 'username',
-		label: '登录名',
-		type: 'input',
-		placeholder: '请输入',
-		required: true,
-	},
-	{
-		field: 'nickname',
-		label: '昵称',
-		type: 'input',
-		placeholder: '请输入',
-		required: true,
-	},
+  {
+    field: 'username',
+    label: '账号',
+    type: 'input',
+    required: true,
+    componentProps: {
+      placeholder: '请输入账号',
+      maxlength: 50
+    }
+  },
+  {
+    field: 'nickname',
+    label: '昵称',
+    type: 'input',
+    required: true,
+    componentProps: {
+      placeholder: '请输入昵称',
+      maxlength: 50
+    }
+  },
+  {
+    field: 'avatar',
+    label: '头像',
+    type: 'upload-img',
+    componentProps: {
+      placeholder: '请上传头像'
+    }
+  },
+  {
+    field: 'email',
+    label: '邮箱',
+    type: 'input',
+    componentProps: {
+      placeholder: '请输入邮箱',
+      maxlength: 50
+    }
+  },
+  {
+    field: 'mobile',
+    label: '手机号',
+    type: 'input',
+    componentProps: {
+      placeholder: '请输入手机号',
+      maxlength: 30
+    }
+  },
+  {
+    field: 'status',
+    label: '状态',
+    type: 'select',
+    required: true,
+    componentProps: {
+      options: [
+        { label: '正常', value: 0 },
+        { label: '禁用', value: 1 }
+      ]
+    }
+  },
+  {
+    field: 'sort',
+    label: '排序',
+    type: 'input-number',
+    componentProps: {
+      placeholder: '请输入排序号',
+      min: 0
+    }
+  }
 ]
 const columns = [
 	{
@@ -136,18 +191,30 @@ const columns = [
 				: dayjs(row.row.createAt).format('YYYY-MM-DD HH:mm:ss')
 		},
 	},
+  { 
+    field: 'status', 
+    title: '状态', 
+    width: 100,
+    formatter: (row) => {
+      return row.row.status === 0 ? '正常' : '禁用'
+    }
+  },
 	{
 		title: '操作',
-		width: 280,
+		width: 380,
 		align: 'center',
 		fixed: 'right',
 		slots: {
 			default: ({ row }) => {
 				return createSpaceGroup([
 					createButton('primary', 'small', '编辑', () => updateColumnData(row)),
-					createButton('warning', 'small', '角色', () => showBindRole(row)),
-					createButton('danger', 'small', '删除', () => handleDelete(row.id)),
-					createButton('warning', 'small', '修改密码', () => changePasswordModel(row))
+					createButton('success', 'small', '绑定角色', () => showBindRole(row)),
+					createButton(row.status === 0 ? 'warning' : 'success', 'small', 
+            row.status === 0 ? '禁用' : '启用', 
+            () => toggleUserStatus(row)
+          ),
+					createButton('warning', 'small', '改密码', () => changePasswordModel(row)),
+					createButton('danger', 'small', '删除', () => handleDelete(row))
 				])
 			},
 		},
@@ -179,14 +246,20 @@ const params = ref({
 	pageSize: 10,
 })
 const add = async () => {
-	title.value = '新增'
-	visible.value = true
-	formData.value = renderForm.reduce((acc, cur) => {
-		acc[cur.field] = ''
-		return acc
-	}, {})
-	formData.value.password = '123456'
-	formFunc.value = addUser
+  title.value = '新增用户'
+  visible.value = true
+  formData.value = {
+    username: '',
+    nickname: '',
+    password: '123456', // 默认密码
+    avatar: '',
+    email: '',
+    mobile: '',
+    status: 0,
+    sort: 1,
+    userType: 0
+  }
+  formFunc.value = addUser
 }
 
 const close = (e) => {
@@ -213,12 +286,38 @@ const updateColumnData = (row) => {
 }
 
 const changePasswordModel = (row) => {
-	const rowBak = JSON.parse(JSON.stringify(row))
-	delete rowBak._X_ROW_KEY
-	title.value = '修改密码'
-	formData.value = rowBak
-	formFunc.value = changePassword
+  title.value = '修改密码'
+  visible.value = true
+  formData.value = {
+    id: row.id,
+    password: '',
+    confirmPassword: ''
+  }
+  renderForm.value = [
+    {
+      field: 'password',
+      label: '新密码',
+      type: 'input',
+      required: true,
+      componentProps: {
+        type: 'password',
+        placeholder: '请输入新密码'
+      }
+    },
+    {
+      field: 'confirmPassword',
+      label: '确认密码',
+      type: 'input',
+      required: true,
+      componentProps: {
+        type: 'password',
+        placeholder: '请再次输入新密码'
+      }
+    }
+  ]
+  formFunc.value = changePassword
 }
+
 const deleteFunc = async (id) => {
 	ElMessageBox.confirm('确认删除吗？', '提示', {
 		confirmButtonText: '确定',
@@ -264,7 +363,7 @@ const roleRenderForm = [
     required: true,
     componentProps: {
       multiple: true,
-      renderFunc: getUserRoles,
+      renderFunc: roleList,
       renderParams: {},
       formatData: {
         label: 'name',
@@ -275,29 +374,76 @@ const roleRenderForm = [
 ]
 
 const showBindRole = async (row) => {
-  roleVisible.value = true
-  roleFormData.value.userId = row.id
-  const roles = await getUserRoles(row.id)
-  roleFormData.value.roleIds = roles.data.map(role => role.id)
+  try {
+    // 先获取用户当前的角色
+    const userRoles = await getUserRoles(row.id)
+    console.log('用户当前角色:', userRoles)
+    
+    // 设置表单数据
+    roleVisible.value = true
+    roleFormData.value = {
+      userId: row.id,
+      roleIds: userRoles.map(role => role.id) || []
+    }
+    
+    console.log('角色表单数据:', roleFormData.value)
+  } catch (error) {
+    console.error('获取用户角色失败:', error)
+    ElMessage.error('获取用户角色失败')
+  }
+}
+
+const bindRole = async (formData) => {
+  try {
+    await bindUserRole({
+      userId: formData.userId,
+      roleIds: formData.roleIds
+    })
+    ElMessage.success('角色绑定成功')
+    roleVisible.value = false
+    return true
+  } catch (error) {
+    ElMessage.error('角色绑定失败')
+    return false
+  }
 }
 
 const closeRole = (refresh) => {
   roleVisible.value = false
+  roleFormData.value = { userId: '', roleIds: [] }  // 重置表单数据
   if(refresh) {
     refreshTable()
   }
 }
 
-const handleDelete = (id) => {
-  ElMessageBox.confirm('确认删除该用户?', '警告', {
+const handleDelete = (row) => {
+  ElMessageBox.confirm(`确认删除用户"${row.nickname}"吗？`, '警告', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning'
   }).then(async () => {
-    await delUser(id)
-    ElMessage.success('删除成功')
+    try {
+      await delUser(row.id)
+      ElMessage.success('删除成功')
+      refreshTable()
+    } catch (error) {
+      ElMessage.error('删除失败')
+    }
+  }).catch(() => {})
+}
+
+// 切换用户状态
+const toggleUserStatus = async (row) => {
+  try {
+    await updateUser({
+      id: row.id,
+      status: row.status === 0 ? 1 : 0
+    })
+    ElMessage.success(`${row.status === 0 ? '禁用' : '启用'}成功`)
     refreshTable()
-  })
+  } catch (error) {
+    ElMessage.error(`${row.status === 0 ? '禁用' : '启用'}失败`)
+  }
 }
 
 </script>
